@@ -9,13 +9,13 @@
 const int trigPin[4] = {5, 7, 9, 11};
 const int echoPin[4] = {4, 6, 8, 10};
 const int czujnikZmierzchu = 3;
-const int przelacznik = 45;
+const int wlacznikSwiatel = 45;
 unsigned long timerResetu; //timer resetu calego systemu
 unsigned long timerPrzelaczenia; //timer zastepujacy klasyczne delay() ktorego nie mozna uzyc ze wzgledu na calkowite zatrzymanie systemu
 unsigned long timerPrzelaczenia2;
 unsigned long ostatnioUzywany[4] = {0, 0, 0, 0};  //timery zapobiegajace wielokrotnej zmianie statusu czujnika
 unsigned long timerDol, timerGora;  //timery sluzace do resetu czujnikow
-int tajnaWartoscDol, tajnaWartoscGora; //wartosc o ktora bedziemy zmniejszac czas_przelaczenia swiatel
+int skroceniePrzelaczeniaDol, skroceniePrzelaczeniaGora; //wartosc o ktora bedziemy zmniejszac czas_przelaczenia swiatel
 int doDolu, doGory;  //ile osob wchodzi po schodach w danym kierunkum   
 int j, k = 22, l = 38; //zmienne zastepujace klasyczna petle for ktorych czasami nie mozemy uzyc
 
@@ -40,14 +40,14 @@ void setup() {
  pinMode(11, OUTPUT); //trig3
  pinMode(10, INPUT); //echo3
  
- pinMode(45, INPUT_PULLUP ); //przelacznik
+ pinMode(45, INPUT_PULLUP ); //wlacznikSwiatel, jezeli HIGH to wlaczone
  pinMode(3, INPUT ); //czujnik zmierzchu
  
 /*for( int i=22; i<39; i++ ){
    pinMode(i, OUTPUT);
  }*/
   
- pinMode(22, OUTPUT);
+ pinMode(22, OUTPUT); //pin'y swiatel, jezeli LOW to wlaczone
  pinMode(23, OUTPUT);
  pinMode(24, OUTPUT);
  pinMode(25, OUTPUT);
@@ -65,17 +65,17 @@ void setup() {
  pinMode(37, OUTPUT);
  pinMode(38, OUTPUT);
  for( int i=22; i<39; i++ ){
-   digitalWrite( i, HIGH );
+   digitalWrite( i, HIGH ); 
  }
 }
  
 void loop() {
-  if( digitalRead( przelacznik ) == HIGH || ( digitalRead( przelacznik ) == LOW && zmierzch )){
+  if( digitalRead( wlacznikSwiatel ) == HIGH || ( digitalRead( wlacznikSwiatel ) == LOW && zmierzch )){
     unsigned long aktualnyCzas;
     sprawdzStanCzujnikow();
     
     aktualnyCzas = millis();
-    if( zapalanieOdDolu && timerPrzelaczenia + CZAS_PRZELACZENIA - tajnaWartoscDol < aktualnyCzas ){
+    if( zapalanieOdDolu && timerPrzelaczenia + CZAS_PRZELACZENIA - skroceniePrzelaczeniaDol < aktualnyCzas ){
       digitalWrite( k, LOW );
       wystapiloPrzelaczenie = true;
       
@@ -88,7 +88,7 @@ void loop() {
       k++;
     }
     
-    if( zapalanieOdGory && timerPrzelaczenia2 + CZAS_PRZELACZENIA - tajnaWartoscGora < aktualnyCzas ){
+    if( zapalanieOdGory && timerPrzelaczenia2 + CZAS_PRZELACZENIA - skroceniePrzelaczeniaGora < aktualnyCzas ){
       digitalWrite( l, LOW );
       wystapiloPrzelaczenie2 = true;
       
@@ -153,14 +153,14 @@ void loop() {
       if( k != 31 )
         timerPrzelaczenia = aktualnyCzas;
       else
-        timerPrzelaczenia = aktualnyCzas + CZAS_PRZELACZENIA - tajnaWartoscDol;
+        timerPrzelaczenia = aktualnyCzas + CZAS_PRZELACZENIA - skroceniePrzelaczeniaDol;
       wystapiloPrzelaczenie = false;
     }
     if( wystapiloPrzelaczenie2 ){
       if( l != 29 )
         timerPrzelaczenia2 = aktualnyCzas;
       else
-        timerPrzelaczenia2 = aktualnyCzas + CZAS_PRZELACZENIA - tajnaWartoscGora;
+        timerPrzelaczenia2 = aktualnyCzas + CZAS_PRZELACZENIA - skroceniePrzelaczeniaGora;
       wystapiloPrzelaczenie2 = false;
     }
   }
@@ -225,16 +225,16 @@ void sprawdzStanCzujnikow(){
         k = 23;
         predkoscDol = aktualnyCzas - ostatnioUzywany[0];
         predkoscDol = ODLEGLOSC_CZUJNIKOW / predkoscDol; //mamy predkosc w cm/ms
-        predkoscDol = predkoscDol * 10; //a teraz w m/s
+        predkoscDol = predkoscDol * 10;                  //a teraz w m/s
         if( predkoscDol >= 1 && predkoscDol <= 3 )
-          predkoscDol = CZAS_PRZELACZENIA / predkoscDol; //taki trik
+          predkoscDol = CZAS_PRZELACZENIA / predkoscDol;
         else
           predkoscDol = CZAS_PRZELACZENIA;
         
         if( !gaszenieOdDolu && !gaszenieOdGory )
-          tajnaWartoscDol = CZAS_PRZELACZENIA - predkoscDol; //? wymysl co tu
+          skroceniePrzelaczeniaDol = CZAS_PRZELACZENIA - predkoscDol; //prawdopodobnie trzeba dodac tu jakis wspolczynnik
         else
-          tajnaWartoscDol = 0;
+          skroceniePrzelaczeniaDol = 0;
       }
       status[0] = false;
       ostatnioUzywany[1] = aktualnyCzas;
@@ -260,14 +260,14 @@ void sprawdzStanCzujnikow(){
         predkoscGora = ODLEGLOSC_CZUJNIKOW / predkoscGora;
         predkoscGora = predkoscGora * 10;
         if( predkoscGora >= 1 && predkoscGora <= 3)
-          predkoscGora = CZAS_PRZELACZENIA / predkoscGora; //taki trik
+          predkoscGora = CZAS_PRZELACZENIA / predkoscGora;
         else
           predkoscGora = CZAS_PRZELACZENIA;
           
         if( !gaszenieOdDolu && !gaszenieOdGory )
-          tajnaWartoscGora = CZAS_PRZELACZENIA - predkoscGora; //wymysl co tu
+          skroceniePrzelaczeniaGora = CZAS_PRZELACZENIA - predkoscGora; //prawdopodobnie trzeba dodac tu jakis wspolczynnik
         else
-          tajnaWartoscGora = 0;
+          skroceniePrzelaczeniaGora = 0;
       }
       status[3] = false;
       ostatnioUzywany[2] = aktualnyCzas;
