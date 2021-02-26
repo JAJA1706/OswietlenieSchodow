@@ -1,4 +1,4 @@
-# OswietlenieSchodow
+# Oświetlenie Schodów
 Program dla zestawu płytki Arduino MEGA 2560 (lub innej od odpowiedniej ilości wejść), 4 czujników odlegósci HC-SR04 oraz oświetlenia LED na każdym stopniu schodów.
 
 Jego działanie polega na wykryciu osoby mijającej czujniki i zapalaniu po kolei oświetlenia LED na stopniach w kierunku poruszania się, uwzgledniając prędkość danej postaci.  
