@@ -4,3 +4,5 @@ Program dla zestawu płytki Arduino MEGA 2560 (lub innej od odpowiedniej ilości
 Jego działanie polega na wykryciu osoby mijającej czujniki i zapalaniu po kolei oświetlenia LED na stopniach w kierunku poruszania się, uwzgledniając prędkość danej postaci.  
 Po minięciu czujników po drugiej stronie, oświetlenie zacznie gasnąć po kolei, począwszy od uprzednio jako pierwszego zapalonego.  
 Program uwzględnia przypadek gdy wiele osób znajduje się na schodach.
+
+Najnowsza wersja (poprawienie czytelności) nie była testowana w rzeczywistach warunkach, w razie problemów powrocić do commit'a z pojedynczym plikiem.
